@@ -13,7 +13,7 @@ namespace MapRandomizer
         {
             EnableGRMAEBCTAOPatch = null;
             AddContractBiomes = null;
-    }
+        }
 
     }
 }
