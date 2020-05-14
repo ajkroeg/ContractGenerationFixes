@@ -1,7 +1,6 @@
-#Exclude Windows Junk
 desktop.ini
 
-#Exlude MODS build
+MapRandomizer/.vs
 MapRandomizer/MapRandomizer/bin
 MapRandomizer/MapRandomizer/obj
 MapRandomizer/MapRandomizer/packages
