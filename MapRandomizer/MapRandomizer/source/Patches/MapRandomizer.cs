@@ -93,7 +93,7 @@ namespace MapRandomizer.Patches
 				if (ModState.EnableGRMAEBCTAOPatch == null) return true;
 				if (ModState.SpecMapID != null)
 				{
-					ModState.IgnoreBiomes = "Ignore_Biomes";
+					ModState.IgnoreBiomes = "TRUE";
 				}
 					
 
@@ -106,7 +106,7 @@ namespace MapRandomizer.Patches
 				text += "LEFT JOIN ContentPack as cp ON cpi.ContentPackID = cp.ContentPackID ";
 				text += "WHERE el.IncludeInBuild = 1 AND m.IncludeInBuild = 1 AND ct.ContractTypeID = @ContractTypeID ";
 				text += "AND (cp.IsOwned=1 OR cp.IsOwned IS NULL) ";
-				if (ModState.IgnoreBiomes != "Ignore_Biomes")
+				if (ModState.IgnoreBiomes != "TRUE")
 				{
 					text += "AND bs.BiomeSkinID IN @Name ";
 				}
