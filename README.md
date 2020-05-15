@@ -14,9 +14,9 @@ Example use of additional values:
       "Target",                         //  OpFor faction name, required
       "Employer",                       //  Employer faction name, required
       "TargetSystem",                   //  Target star system, optional. If present, spawns travel contract.
-      "TargetAlly",                     //  Allied faction, optional (if appropriate to contract).
+      "TargetAlly",                     //  Allied faction name, optional (if appropriate to contract).
       "MapID",                          //  MapID of desired map, optional.
-      "IgnoreBiomes"                    //  Optional. If set to "TRUE," will spawn maps that do not match Target
+      "IgnoreBiomes"                    //  Optional. If set to "TRUE" will spawn maps that do not match Target
     ]                                   //    (or Current) star system. If null or any other string, random maps 
 }                                       //    will match biomes of star system. Not needed if MapID used above.
 ```
