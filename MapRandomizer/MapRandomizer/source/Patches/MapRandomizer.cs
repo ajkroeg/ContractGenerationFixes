@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using BattleTech.Data;
 using BattleTech;
+using JetBrains.Annotations;
+using System.Runtime.Remoting.Messaging;
 
 namespace MapRandomizer.Patches
 {
@@ -23,6 +25,18 @@ namespace MapRandomizer.Patches
 				list[n] = value;
 			}
 		}
+
+		[HarmonyPatch(typeof(BattleTech.SimGameState), "ParseContractActionData")]
+		public static class ParseContractActionData_Patch
+		{
+			public static bool Prefix(ref SimGameState __instance, ref bool __result, string actionValue, string[] additionalValues)
+			{
+				ModState.SpecMapID = additionalValues.ElementAtOrDefault(4);
+				ModState.IgnoreBiomes = additionalValues.ElementAtOrDefault(5);
+				return true;
+			}
+		}
+
 		[HarmonyPatch(typeof(BattleTech.SimGameState), "AddContract")]
 		public static class AddContract_Patch
 		{
@@ -57,7 +71,15 @@ namespace MapRandomizer.Patches
 				{
 					ModState.AddContractBiomes = null;
 				}
-
+				if (ModState.IgnoreBiomes != null)
+				{
+					ModState.IgnoreBiomes = null;
+				}
+				if (ModState.SpecMapID !=null)
+				{
+					ModState.SpecMapID = null;
+				}
+				
 			}
 
 		}
@@ -69,6 +91,11 @@ namespace MapRandomizer.Patches
 
 			{
 				if (ModState.EnableGRMAEBCTAOPatch == null) return true;
+				if (ModState.SpecMapID != null)
+				{
+					ModState.IgnoreBiomes = "Ignore_Biomes";
+				}
+					
 
 				List<MapAndEncounters> result = new List<MapAndEncounters>();
 				string text = "SELECT m.*, el.* FROM EncounterLayer AS el ";
@@ -79,11 +106,18 @@ namespace MapRandomizer.Patches
 				text += "LEFT JOIN ContentPack as cp ON cpi.ContentPackID = cp.ContentPackID ";
 				text += "WHERE el.IncludeInBuild = 1 AND m.IncludeInBuild = 1 AND ct.ContractTypeID = @ContractTypeID ";
 				text += "AND (cp.IsOwned=1 OR cp.IsOwned IS NULL) ";
-				text += "AND bs.BiomeSkinID IN @Name ";
-				if (!includeUnpublishedContractTypes)
+				if (ModState.IgnoreBiomes != "Ignore_Biomes")
 				{
-					text += "AND ct.IsPublished = 1 ";
+					text += "AND bs.BiomeSkinID IN @Name ";
 				}
+				if (ModState.SpecMapID != null)
+				{
+					text += "AND m.MapID = @MapID ";
+				}
+				if (!includeUnpublishedContractTypes)
+					{
+					text += "AND ct.IsPublished = 1 ";
+					}
 				text += "ORDER BY m.FriendlyName";
 				mdd.Query<Map_MDD, EncounterLayer_MDD, MapAndEncounters>(text, delegate (Map_MDD m, EncounterLayer_MDD e)
 				{
@@ -99,7 +133,9 @@ namespace MapRandomizer.Patches
 				}, new
 				{
 					ContractTypeID = contractTypeID,
-					Name = ModState.AddContractBiomes.ToArray()
+					Name = ModState.AddContractBiomes.ToArray(),
+					MapID = ModState.SpecMapID
+					
 				}, null, true, "MapID", null, null); ;
 
 				result.Shuffle();
