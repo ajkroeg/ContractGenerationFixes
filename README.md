@@ -20,6 +20,6 @@ Example use of additional values:
     ]                                   //    (or Current) star system. If null or any other string, random maps 
 }                                       //    will match biomes of star system. Not needed if MapID used above.
 ```
-Any <i>optional</i> unused additional values not used must be set `null` if later additional values are used. For example, `TargetAlly` must be set `null` if `IgnoreBiomes` TRUE.
+Any <i>optional</i> unused additional values must be set `null` if later additional values are used. For example, if unused, `TargetAlly` and `MapID` must be set `null` if `IgnoreBiomes` TRUE.
 
 Setting a MapID that is invalid for the chosen contract type <i>will</i> break the event.
