@@ -7,17 +7,20 @@ namespace MapRandomizer
     public static class ModState
     {
         
-        public static string EnableGRMAEBCTAOPatch = null;
+        public static string IsSystemActionPatch = null;
         public static List<Biome.BIOMESKIN> AddContractBiomes = null;
         public static string SpecMapID = null;
         public static string IgnoreBiomes = null;
+        public static int CustomDifficulty = 0;
+        public static int SysAdjustDifficulty = 0;
         public static void Reset()
         {
-            EnableGRMAEBCTAOPatch = null;
+            IsSystemActionPatch = null;
             AddContractBiomes = null;
             SpecMapID = null;
             IgnoreBiomes = null;
-
+            CustomDifficulty = 0;
+            SysAdjustDifficulty = 0;
         }
 
     }

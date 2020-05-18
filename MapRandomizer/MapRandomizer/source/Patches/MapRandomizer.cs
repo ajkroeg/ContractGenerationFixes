@@ -6,6 +6,7 @@ using BattleTech.Data;
 using BattleTech;
 using JetBrains.Annotations;
 using System.Runtime.Remoting.Messaging;
+using System;
 
 namespace MapRandomizer.Patches
 {
@@ -31,8 +32,11 @@ namespace MapRandomizer.Patches
 		{
 			public static bool Prefix(ref SimGameState __instance, ref bool __result, string actionValue, string[] additionalValues)
 			{
+				ModState.IsSystemActionPatch = actionValue;
 				ModState.SpecMapID = additionalValues.ElementAtOrDefault(4);
 				ModState.IgnoreBiomes = additionalValues.ElementAtOrDefault(5);
+				ModState.CustomDifficulty = Convert.ToInt32(additionalValues.ElementAtOrDefault(6));
+				ModState.SysAdjustDifficulty = Convert.ToInt32(additionalValues.ElementAtOrDefault(7));
 				return true;
 			}
 		}
@@ -42,8 +46,6 @@ namespace MapRandomizer.Patches
 		{
 			public static void Prefix(ref SimGameState __instance, ref bool __result, Dictionary<string, StarSystem> ___starDict, SimGameState.AddContractData contractData)
 			{
-				ModState.EnableGRMAEBCTAOPatch = contractData.ContractName;
-				
 				StarSystem AddContractSystem;
 				if (!string.IsNullOrEmpty(contractData.TargetSystem))
 				{
@@ -63,9 +65,9 @@ namespace MapRandomizer.Patches
 
 			public static void Postfix(ref SimGameState __instance, ref bool __result, SimGameState.AddContractData contractData)
 			{
-				if (ModState.EnableGRMAEBCTAOPatch != null)
+				if (ModState.IsSystemActionPatch != null)
 				{
-					ModState.EnableGRMAEBCTAOPatch = null;
+					ModState.IsSystemActionPatch = null;
 				}
 				if (ModState.AddContractBiomes != null)
 				{
@@ -79,9 +81,44 @@ namespace MapRandomizer.Patches
 				{
 					ModState.SpecMapID = null;
 				}
-				
+				if (ModState.CustomDifficulty != 0)
+				{
+					ModState.CustomDifficulty = 0;
+				}
 			}
 
+		}
+		
+		[HarmonyPatch(typeof(BattleTech.StarSystemDef), "GetDifficulty")]
+		public static class GetDifficultyPatch
+		{
+			public static bool Prefix(StarSystemDef __instance, SimGameState.SimGameType type, ref int __result)
+			{
+				if (ModState.IsSystemActionPatch == null)
+				{
+					return true;
+				}
+				
+				if (ModState.CustomDifficulty > 0)
+				{
+					__result = ModState.CustomDifficulty;
+					return false;
+				}
+				if (ModState.SysAdjustDifficulty != 0)
+				{
+					var SysDefaultDiff = Traverse.Create(__instance).Field("DefaultDifficulty").GetValue<int>();
+					var SysDiffModes = Traverse.Create(__instance).Field("DifficultyModes").GetValue<List<SimGameState.SimGameType>>();
+					var SysDiffList = Traverse.Create(__instance).Field("DifficultyList").GetValue<List<int>>();
+					
+
+					if (SysDiffModes != null && SysDiffModes.Contains(type))
+					{
+						__result = SysDiffList[SysDiffModes.IndexOf(type)];
+					}
+					__result = ModState.SysAdjustDifficulty + SysDefaultDiff;
+				}
+				return false;
+			}
 		}
 
 		[HarmonyPatch(typeof(BattleTech.Data.MapsAndEncounters_MDDExtensions), "GetReleasedMapsAndEncountersByContractTypeAndOwnership")]
@@ -90,7 +127,10 @@ namespace MapRandomizer.Patches
 			public static bool Prefix(ref List<MapAndEncounters> __result, MetadataDatabase mdd, int contractTypeID, bool includeUnpublishedContractTypes)
 
 			{
-				if (ModState.EnableGRMAEBCTAOPatch == null) return true;
+				if (ModState.IsSystemActionPatch == null)
+				{
+					return true;
+				}
 				if (ModState.SpecMapID != null)
 				{
 					ModState.IgnoreBiomes = "TRUE";
