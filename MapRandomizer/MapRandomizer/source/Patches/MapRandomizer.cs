@@ -7,6 +7,7 @@ using BattleTech;
 using JetBrains.Annotations;
 using System.Runtime.Remoting.Messaging;
 using System;
+using UnityEngine;
 
 namespace MapRandomizer.Patches
 {
@@ -41,12 +42,16 @@ namespace MapRandomizer.Patches
 			}
 		}
 
+		
+
+
 		[HarmonyPatch(typeof(BattleTech.SimGameState), "AddContract")]
 		public static class AddContract_Patch
 		{
 			public static void Prefix(ref SimGameState __instance, ref bool __result, Dictionary<string, StarSystem> ___starDict, SimGameState.AddContractData contractData)
 			{
 				StarSystem AddContractSystem;
+				
 				if (!string.IsNullOrEmpty(contractData.TargetSystem))
 				{
 					string validatedSystemString = __instance.GetValidatedSystemString(contractData.TargetSystem);
@@ -61,6 +66,7 @@ namespace MapRandomizer.Patches
 					AddContractSystem = __instance.CurSystem;
 				}
 				ModState.AddContractBiomes = AddContractSystem.Def.SupportedBiomes;
+				
 			}
 
 			public static void Postfix(ref SimGameState __instance, ref bool __result, SimGameState.AddContractData contractData)
@@ -88,7 +94,59 @@ namespace MapRandomizer.Patches
 			}
 
 		}
-		
+		[HarmonyPatch(typeof(BattleTech.SimGameState), "PrepContract")]
+		public static class PrepContractPatch
+		{
+			public static bool Prefix(SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
+			{
+				{
+					if (ModState.IsSystemActionPatch == null)
+					{
+						return true;
+					}
+					//if (presetSeed != 0 && !contract.IsPriorityContract)
+					{
+						int baseDiff = system.Def.GetDifficulty(__instance.SimGameMode) + Mathf.FloorToInt(__instance.GlobalDifficulty);
+						int min;
+						int num;
+						min = baseDiff - 1;
+						num = baseDiff + 1;
+						int finalDifficulty = new NetworkRandom
+						{
+							seed = presetSeed
+						}.Int(min, num + 1);
+						contract.SetFinalDifficulty(finalDifficulty);
+					}
+					FactionValue player1sMercUnitFactionValue = FactionEnumeration.GetPlayer1sMercUnitFactionValue();
+					FactionValue player2sMercUnitFactionValue = FactionEnumeration.GetPlayer2sMercUnitFactionValue();
+					contract.AddTeamFaction("bf40fd39-ccf9-47c4-94a6-061809681140", player1sMercUnitFactionValue.ID);
+					contract.AddTeamFaction("757173dd-b4e1-4bb5-9bee-d78e623cc867", player2sMercUnitFactionValue.ID);
+					contract.AddTeamFaction("ecc8d4f2-74b4-465d-adf6-84445e5dfc230", employer.ID);
+					contract.AddTeamFaction("70af7e7f-39a8-4e81-87c2-bd01dcb01b5e", employersAlly.ID);
+					contract.AddTeamFaction("be77cadd-e245-4240-a93e-b99cc98902a5", target.ID);
+					contract.AddTeamFaction("31151ed6-cfc2-467e-98c4-9ae5bea784cf", targetsAlly.ID);
+					contract.AddTeamFaction("61612bb3-abf9-4586-952a-0559fa9dcd75", NeutralToAll.ID);
+					contract.AddTeamFaction("3c9f3a20-ab03-4bcb-8ab6-b1ef0442bbf0", HostileToAll.ID);
+					contract.SetupContext();
+					int finalDifficulty2 = contract.Override.finalDifficulty;
+					int num2;
+					if (contract.Override.contractRewardOverride >= 0)
+					{
+						num2 = contract.Override.contractRewardOverride;
+					}
+					else
+					{
+						num2 = __instance.CalculateContractValueByContractType(contract.ContractTypeValue, finalDifficulty2, (float)__instance.Constants.Finances.ContractPricePerDifficulty, __instance.Constants.Finances.ContractPriceVariance, presetSeed);
+					}
+					num2 = SimGameState.RoundTo((float)num2, 1000);
+					contract.SetInitialReward(num2);
+					contract.SetBiomeSkin(skin);
+				}
+				return false;
+			}
+		}
+
+
 		[HarmonyPatch(typeof(BattleTech.StarSystemDef), "GetDifficulty")]
 		public static class GetDifficultyPatch
 		{
