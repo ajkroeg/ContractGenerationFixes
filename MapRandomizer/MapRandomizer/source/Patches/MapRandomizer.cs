@@ -87,10 +87,6 @@ namespace MapRandomizer.Patches
 				{
 					ModState.SpecMapID = null;
 				}
-				if (ModState.CustomDifficulty != 0)
-				{
-					ModState.CustomDifficulty = 0;
-				}
 			}
 
 		}
