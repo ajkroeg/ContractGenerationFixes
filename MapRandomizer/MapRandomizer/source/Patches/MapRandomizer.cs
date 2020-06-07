@@ -9,24 +9,46 @@ using System.Runtime.Remoting.Messaging;
 using System;
 using UnityEngine;
 
+
 namespace MapRandomizer.Patches
 {
+	public static class IntegerExtensions
+	{
+		public static int ParseInt(this string value, int defaultIntValue = 0)
+		{
+			int parsedInt;
+			if (int.TryParse(value, out parsedInt))
+			{
+				return parsedInt;
+			}
+
+			return defaultIntValue;
+		}
+
+		public static int? ParseNullableInt(this string value)
+		{
+			if (string.IsNullOrEmpty(value))
+				return null;
+
+			return value.ParseInt();
+		}
+	}
 	static class MapRandomizerPatches
 	{
-		private static System.Random rng = new System.Random();
-		public static void Shuffle<T>(this IList<T> list)
-
-		{
-			int n = list.Count;
-			while (n > 1)
-			{
-				n--;
-				int k = rng.Next(n + 1);
-				T value = list[k];
-				list[k] = list[n];
-				list[n] = value;
-			}
-		}
+//		private static System.Random rng = new System.Random();
+//		public static void Shuffle<T>(this IList<T> list)
+//
+//		{
+//			int n = list.Count;
+//			while (n > 1)
+//			{
+//				n--;
+//				int k = rng.Next(n + 1);
+//				T value = list[k];
+//				list[k] = list[n];
+//				list[n] = value;
+//			}
+//		}
 
 		[HarmonyPatch(typeof(BattleTech.SimGameState), "ParseContractActionData")]
 		public static class ParseContractActionData_Patch
@@ -36,8 +58,8 @@ namespace MapRandomizer.Patches
 				ModState.IsSystemActionPatch = actionValue;
 				ModState.SpecMapID = additionalValues.ElementAtOrDefault(4);
 				ModState.IgnoreBiomes = additionalValues.ElementAtOrDefault(5);
-				ModState.CustomDifficulty = Convert.ToInt32(additionalValues.ElementAtOrDefault(6));
-				ModState.SysAdjustDifficulty = Convert.ToInt32(additionalValues.ElementAtOrDefault(7));
+				ModState.CustomDifficulty = additionalValues.ElementAtOrDefault(6).ParseInt();
+				ModState.SysAdjustDifficulty = additionalValues.ElementAtOrDefault(7).ParseInt();
 				return true;
 			}
 		}
@@ -87,6 +109,14 @@ namespace MapRandomizer.Patches
 				{
 					ModState.SpecMapID = null;
 				}
+				if (ModState.CustomDifficulty != 0)
+	            {
+					ModState.CustomDifficulty = 0;
+	             }
+				if (ModState.SysAdjustDifficulty != 0)
+				{
+					ModState.SysAdjustDifficulty = 0;
+				}
 			}
 
 		}
@@ -96,23 +126,38 @@ namespace MapRandomizer.Patches
 			public static bool Prefix(SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
 			{
 				{
-					if (ModState.IsSystemActionPatch == null)
-					{
-						return true;
-					}
-					//if (presetSeed != 0 && !contract.IsPriorityContract)
+		//			if (ModState.IsSystemActionPatch == null)
+		//			{
+		//				return true;
+		//			}
+					if (presetSeed != 0 && !contract.IsPriorityContract)
 					{
 						int baseDiff = system.Def.GetDifficulty(__instance.SimGameMode) + Mathf.FloorToInt(__instance.GlobalDifficulty);
 						int min;
 						int num;
-						min = baseDiff - 1;
-						num = baseDiff + 1;
+						if (ModState.SysAdjustDifficulty != 0)
+						{
+							baseDiff += ModState.SysAdjustDifficulty;
+						}
+						else if(ModState.CustomDifficulty > 0)
+						{
+							baseDiff = ModState.CustomDifficulty;
+						}
+						int contractDifficultyVariance = __instance.Constants.Story.ContractDifficultyVariance;
+						min = baseDiff - Mathf.Max(1, baseDiff - contractDifficultyVariance);
+						num = baseDiff + Mathf.Max(1, baseDiff + contractDifficultyVariance);
 						int finalDifficulty = new NetworkRandom
 						{
 							seed = presetSeed
 						}.Int(min, num + 1);
+						if(__instance.HasTravelContract==true && contract.Name==__instance.ActiveTravelContract.Name)
+                        {
+							finalDifficulty = ModState.LastDiff;
+                        }
+						ModState.LastDiff = finalDifficulty;
 						contract.SetFinalDifficulty(finalDifficulty);
 					}
+					
 					FactionValue player1sMercUnitFactionValue = FactionEnumeration.GetPlayer1sMercUnitFactionValue();
 					FactionValue player2sMercUnitFactionValue = FactionEnumeration.GetPlayer2sMercUnitFactionValue();
 					contract.AddTeamFaction("bf40fd39-ccf9-47c4-94a6-061809681140", player1sMercUnitFactionValue.ID);
@@ -143,37 +188,7 @@ namespace MapRandomizer.Patches
 		}
 
 
-		[HarmonyPatch(typeof(BattleTech.StarSystemDef), "GetDifficulty")]
-		public static class GetDifficultyPatch
-		{
-			public static bool Prefix(StarSystemDef __instance, SimGameState.SimGameType type, ref int __result)
-			{
-				if (ModState.IsSystemActionPatch == null)
-				{
-					return true;
-				}
-				
-				if (ModState.CustomDifficulty > 0)
-				{
-					__result = ModState.CustomDifficulty;
-					return false;
-				}
-				if (ModState.SysAdjustDifficulty != 0)
-				{
-					var SysDefaultDiff = Traverse.Create(__instance).Field("DefaultDifficulty").GetValue<int>();
-					var SysDiffModes = Traverse.Create(__instance).Field("DifficultyModes").GetValue<List<SimGameState.SimGameType>>();
-					var SysDiffList = Traverse.Create(__instance).Field("DifficultyList").GetValue<List<int>>();
-					
-
-					if (SysDiffModes != null && SysDiffModes.Contains(type))
-					{
-						__result = SysDiffList[SysDiffModes.IndexOf(type)];
-					}
-					__result = ModState.SysAdjustDifficulty + SysDefaultDiff;
-				}
-				return false;
-			}
-		}
+		
 
 		[HarmonyPatch(typeof(BattleTech.Data.MapsAndEncounters_MDDExtensions), "GetReleasedMapsAndEncountersByContractTypeAndOwnership")]
 		public static class GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch
@@ -230,9 +245,9 @@ namespace MapRandomizer.Patches
 					Name = ModState.AddContractBiomes.ToArray(),
 					MapID = ModState.SpecMapID
 					
-				}, null, true, "MapID", null, null); ;
+				}, null, true, "MapID", null, null);
 
-				result.Shuffle();
+				Utilities.Shuffle(result);
 				__result = result;
 				return false;
 			}

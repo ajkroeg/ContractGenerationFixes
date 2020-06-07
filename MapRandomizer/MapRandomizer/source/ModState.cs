@@ -13,6 +13,8 @@ namespace MapRandomizer
         public static string IgnoreBiomes = null;
         public static int CustomDifficulty = 0;
         public static int SysAdjustDifficulty = 0;
+        public static int LastDiff = 0;
+
         public static void Reset()
         {
             IsSystemActionPatch = null;
@@ -21,6 +23,7 @@ namespace MapRandomizer
             IgnoreBiomes = null;
             CustomDifficulty = 0;
             SysAdjustDifficulty = 0;
+            LastDiff = 0;
         }
 
     }
