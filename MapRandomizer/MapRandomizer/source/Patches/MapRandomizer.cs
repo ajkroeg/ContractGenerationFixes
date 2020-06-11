@@ -126,20 +126,17 @@ namespace MapRandomizer.Patches
 			public static bool Prefix(SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
 			{
 				{
-		//			if (ModState.IsSystemActionPatch == null)
-		//			{
-		//				return true;
-		//			}
+
 					if (presetSeed != 0 && !contract.IsPriorityContract)
 					{
 						int baseDiff = system.Def.GetDifficulty(__instance.SimGameMode) + Mathf.FloorToInt(__instance.GlobalDifficulty);
 						int min;
 						int num;
-						if (ModState.SysAdjustDifficulty != 0)
+						if (ModState.SysAdjustDifficulty != 0 && ModState.IsSystemActionPatch != null)
 						{
 							baseDiff += ModState.SysAdjustDifficulty;
 						}
-						else if(ModState.CustomDifficulty > 0)
+						else if(ModState.CustomDifficulty > 0 && ModState.IsSystemActionPatch != null)
 						{
 							baseDiff = ModState.CustomDifficulty;
 						}
