@@ -167,6 +167,12 @@ namespace MapRandomizer.Patches
 					contract.AddTeamFaction("3c9f3a20-ab03-4bcb-8ab6-b1ef0442bbf0", HostileToAll.ID);
 					contract.SetupContext();
 					int finalDifficulty2 = contract.Override.finalDifficulty;
+
+					if (__instance.HasTravelContract == true && contract.Name == __instance.ActiveTravelContract.Name)
+					{
+						finalDifficulty2 = ModState.LastDiff;
+					}
+
 					int num2;
 					if (contract.Override.contractRewardOverride >= 0)
 					{
