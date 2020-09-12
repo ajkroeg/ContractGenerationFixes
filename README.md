@@ -16,8 +16,8 @@ Example use of additional values:
       "TargetSystem",                   
       "TargetAlly",                     
       "MapID",                          
-      "IgnoreBiomes"
-      "CustomDifficulty"
+      "IgnoreBiomes",
+      "CustomDifficulty",
       "SysAdjustDifficulty"                               
     ]                                   
 }                                       
