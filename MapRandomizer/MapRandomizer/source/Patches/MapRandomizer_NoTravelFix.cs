@@ -147,11 +147,11 @@ namespace MapRandomizer.Patches
 						{
 							seed = presetSeed
 						}.Int(min, num + 1);
-						if(__instance.HasTravelContract==true && contract.Name==__instance.ActiveTravelContract.Name)
-                        {
-							finalDifficulty = ModState.LastDiff;
-                        }
-						ModState.LastDiff = finalDifficulty;
+//						if(__instance.HasTravelContract==true && contract.Name==__instance.ActiveTravelContract.Name)
+//                        {
+//							finalDifficulty = ModState.LastDiff;
+//                        }
+//						ModState.LastDiff = finalDifficulty;
 						contract.SetFinalDifficulty(finalDifficulty);
 					}
 					
@@ -168,10 +168,10 @@ namespace MapRandomizer.Patches
 					contract.SetupContext();
 					int finalDifficulty2 = contract.Override.finalDifficulty;
 
-					if (__instance.HasTravelContract == true && contract.Name == __instance.ActiveTravelContract.Name)
-					{
-						finalDifficulty2 = ModState.LastDiff;
-					}
+//					if (__instance.HasTravelContract == true && contract.Name == __instance.ActiveTravelContract.Name)
+//					{
+//						finalDifficulty2 = ModState.LastDiff;
+//					}
 
 					int num2;
 					if (contract.Override.contractRewardOverride >= 0)
