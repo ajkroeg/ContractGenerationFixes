@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30011.22
+VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapRandomizer", "D:\Users\Anthony\Documents\GitHub\ContractGenerationFixes\MapRandomizer\MapRandomizer\MapRandomizer.csproj", "{70F28A1A-58F4-4061-B12B-17F8B19A3CAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapRandomizer", "MapRandomizer.csproj", "{70F28A1A-58F4-4061-B12B-17F8B19A3CAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {28106AEC-B9BE-482E-90BD-FA2FD4EAF2C3}
+		SolutionGuid = {1E282E2D-880D-45BC-8BB0-374C27135F53}
 	EndGlobalSection
 EndGlobal
