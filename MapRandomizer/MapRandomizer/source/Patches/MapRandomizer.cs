@@ -121,38 +121,56 @@ namespace MapRandomizer.Patches
 
 		}
 		[HarmonyPatch(typeof(BattleTech.SimGameState), "PrepContract")]
-		public static class PrepContractPatch
-		{
+		public static class PrepContractPatch{
+        [HarmonyBefore(new string[] { "com.github.m22spencer.BattletechPerformanceFix", "blue.winds.WarTechIIC" })]
+		[HarmonyPriority(Priority.First)]
 			public static bool Prefix(SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
 			{
 				{
-
-					if (presetSeed != 0 && !contract.IsPriorityContract)
+                    ModInit.modLog.LogMessage($"{contract.Name} presetSeed: {presetSeed}");
+                    ModInit.modLog.LogMessage($"{contract.Name} contract.IsPriorityContract: {contract.IsPriorityContract}");
+                    if (presetSeed != 0 && !contract.IsPriorityContract)
 					{
 						int baseDiff = system.Def.GetDifficulty(__instance.SimGameMode) + Mathf.FloorToInt(__instance.GlobalDifficulty);
+                        ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff}");
 						int min;
 						int num;
 						if (ModState.SysAdjustDifficulty != 0 && ModState.IsSystemActionPatch != null)
 						{
 							baseDiff += ModState.SysAdjustDifficulty;
+                            ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after + ModState.SysAdjustDifficulty {ModState.SysAdjustDifficulty}");
 						}
 						else if(ModState.CustomDifficulty > 0 && ModState.IsSystemActionPatch != null)
 						{
 							baseDiff = ModState.CustomDifficulty;
+                            ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after override from ModState.CustomDifficulty {ModState.CustomDifficulty}");
 						}
 						int contractDifficultyVariance = __instance.Constants.Story.ContractDifficultyVariance;
-						min = baseDiff - Mathf.Max(1, baseDiff - contractDifficultyVariance);
-						num = baseDiff + Mathf.Max(1, baseDiff + contractDifficultyVariance);
+                        ModInit.modLog.LogMessage($"{contract.Name} contractDifficultyVariance: {contractDifficultyVariance}");
+
+						min = Mathf.Max(1, baseDiff - contractDifficultyVariance);
+                        ModInit.modLog.LogMessage($"{contract.Name}: [min = Mathf.Max(1, baseDiff - contractDifficultyVariance)] min: {min}");
+						num = Mathf.Max(1, baseDiff + contractDifficultyVariance);
+                        ModInit.modLog.LogMessage($"{contract.Name}: [max = Mathf.Max(1, baseDiff + contractDifficultyVariance)] max: {num}");
+
 						int finalDifficulty = new NetworkRandom
 						{
 							seed = presetSeed
 						}.Int(min, num + 1);
-						if(__instance.HasTravelContract==true && contract.Name==__instance.ActiveTravelContract.Name)
+                        ModInit.modLog.LogMessage($"{contract.Name} finalDifficulty = random between min and max+1: {min} and {num+1}: {finalDifficulty}");
+
+                        if (ModInit.modSettings.enableTravelFix)
                         {
-							finalDifficulty = ModState.LastDiff;
+                            if(__instance.HasTravelContract==true && contract.Name==__instance.ActiveTravelContract.Name)
+                            {
+                                finalDifficulty = ModState.LastDiff;
+                                ModInit.modLog.LogMessage($"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff: {finalDifficulty}");
+                            }
+                            ModState.LastDiff = finalDifficulty;
+                            ModInit.modLog.LogMessage($"Setting future travel contract override finalDifficulty at ModState.LastDiff: {finalDifficulty}");
                         }
-						ModState.LastDiff = finalDifficulty;
-						contract.SetFinalDifficulty(finalDifficulty);
+                        contract.SetFinalDifficulty(finalDifficulty);
+                        ModInit.modLog.LogMessage($"Setting {contract.Name} finalDifficulty to: {finalDifficulty}");
 					}
 					
 					FactionValue player1sMercUnitFactionValue = FactionEnumeration.GetPlayer1sMercUnitFactionValue();
@@ -167,17 +185,19 @@ namespace MapRandomizer.Patches
 					contract.AddTeamFaction("3c9f3a20-ab03-4bcb-8ab6-b1ef0442bbf0", HostileToAll.ID);
 					contract.SetupContext();
 					int finalDifficulty2 = contract.Override.finalDifficulty;
+                        // ModInit.modLog.LogMessage($"{contract.Name} finalDifficulty2 from contract.Override.finalDifficulty: {finalDifficulty2}");
 
 					if (__instance.HasTravelContract == true && contract.Name == __instance.ActiveTravelContract.Name)
 					{
 						finalDifficulty2 = ModState.LastDiff;
+                   //     ModInit.modLog.LogMessage($"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff: {finalDifficulty2}");
 					}
 
 					int num2;
 					if (contract.Override.contractRewardOverride >= 0)
 					{
 						num2 = contract.Override.contractRewardOverride;
-					}
+                    }
 					else
 					{
 						num2 = __instance.CalculateContractValueByContractType(contract.ContractTypeValue, finalDifficulty2, (float)__instance.Constants.Finances.ContractPricePerDifficulty, __instance.Constants.Finances.ContractPriceVariance, presetSeed);
