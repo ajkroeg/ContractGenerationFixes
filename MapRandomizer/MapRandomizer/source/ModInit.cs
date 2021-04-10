@@ -28,7 +28,7 @@ namespace MapRandomizer
             }
             
 
-            ModInit.modLog.LogMessage($"Initializing MapRandomizer - Version {typeof(Settings).Assembly.GetName().Version}");
+            ModInit.modLog.LogMessage($"Initializing {HarmonyPackage} - Version {typeof(Settings).Assembly.GetName().Version}");
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
