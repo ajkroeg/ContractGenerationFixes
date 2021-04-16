@@ -184,24 +184,21 @@ namespace MapRandomizer.Patches
 					contract.AddTeamFaction("3c9f3a20-ab03-4bcb-8ab6-b1ef0442bbf0", HostileToAll.ID);
 					contract.SetupContext();
 					int finalDifficulty2 = contract.Override.finalDifficulty;
-                        // ModInit.modLog.LogMessage($"{contract.Name} finalDifficulty2 from contract.Override.finalDifficulty: {finalDifficulty2}");
 
-					if (__instance.HasTravelContract == true && contract.Name == __instance.ActiveTravelContract.Name)
-					{
-						finalDifficulty2 = ModState.LastDiff;
-                   //     ModInit.modLog.LogMessage($"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff: {finalDifficulty2}");
-					}
-
-					int num2;
+                    int num2;
 					if (contract.Override.contractRewardOverride >= 0)
 					{
 						num2 = contract.Override.contractRewardOverride;
+                        ModInit.modLog.LogMessage($"Using {num2} for contract reward override");
                     }
+
 					else
 					{
 						num2 = __instance.CalculateContractValueByContractType(contract.ContractTypeValue, finalDifficulty2, (float)__instance.Constants.Finances.ContractPricePerDifficulty, __instance.Constants.Finances.ContractPriceVariance, presetSeed);
+                        ModInit.modLog.LogMessage($"Calculated contract Value using Contract.CalculateContractValueByContractType");
 					}
 					num2 = SimGameState.RoundTo((float)num2, 1000);
+                    ModInit.modLog.LogMessage($"Final contract value: {num2}");
 					contract.SetInitialReward(num2);
 					contract.SetBiomeSkin(skin);
 				}

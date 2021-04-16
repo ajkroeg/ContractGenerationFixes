@@ -37,6 +37,6 @@ namespace MapRandomizer
     class Settings
     {
         public bool enableLogging = true;
-        public bool enableTravelFix = true;
+        public bool enableTravelFix = false;
     }
 }
