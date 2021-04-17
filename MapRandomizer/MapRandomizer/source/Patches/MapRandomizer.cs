@@ -122,6 +122,8 @@ namespace MapRandomizer.Patches
 		}
 		[HarmonyPatch(typeof(BattleTech.SimGameState), "PrepContract")]
 		public static class PrepContractPatch{
+
+            [HarmonyAfter(new string[] { "blue.winds.WarTechIIC" })]
             [HarmonyPriority(Priority.Last)]
 			public static bool Prefix(SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
 			{
