@@ -13,7 +13,7 @@ namespace MapRandomizer
         public static string IgnoreBiomes = null;
         public static int CustomDifficulty = 0;
         public static int SysAdjustDifficulty = 0;
-        public static int LastDiff = 0;
+        public static Dictionary<string, int> SavedDiffs = new Dictionary<string, int>();
 
         public static void Reset()
         {
@@ -23,7 +23,7 @@ namespace MapRandomizer
             IgnoreBiomes = null;
             CustomDifficulty = 0;
             SysAdjustDifficulty = 0;
-            LastDiff = 0;
+            SavedDiffs = new Dictionary<string, int>();
         }
 
     }

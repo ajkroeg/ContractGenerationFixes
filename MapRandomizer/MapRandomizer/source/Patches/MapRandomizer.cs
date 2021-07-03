@@ -162,13 +162,22 @@ namespace MapRandomizer.Patches
 
                         if (ModInit.modSettings.enableTravelFix)
                         {
-                            if(__instance.HasTravelContract==true && contract.Name==__instance.ActiveTravelContract.Name)
+                            if (__instance.HasTravelContract==true && ModState.SavedDiffs.ContainsKey(contract.GUID))
                             {
-                                finalDifficulty = ModState.LastDiff;
-                                ModInit.modLog.LogMessage($"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff: {finalDifficulty}");
+                                finalDifficulty = ModState.SavedDiffs[contract.GUID];
+                                ModInit.modLog.LogMessage($"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff for {contract.GUID}: {finalDifficulty}");
+                                ModState.SavedDiffs.Remove(contract.GUID);
                             }
-                            ModState.LastDiff = finalDifficulty;
-                            ModInit.modLog.LogMessage($"Setting future travel contract override finalDifficulty at ModState.LastDiff: {finalDifficulty}");
+                            else
+                            {
+                                if (contract.Override.travelOnly)
+                                {
+                                    ModState.SavedDiffs.Add(contract.GUID, finalDifficulty);
+                                    ModInit.modLog.LogMessage($"Setting future travel contract override finalDifficulty at ModState.LastDiff: {contract.GUID} - {finalDifficulty}");
+                                }
+                            }
+
+                            
                         }
                         contract.SetFinalDifficulty(finalDifficulty);
                         ModInit.modLog.LogMessage($"Setting {contract.Name} finalDifficulty to: {finalDifficulty}");
