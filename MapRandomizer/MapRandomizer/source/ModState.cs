@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MapRandomizer
 {

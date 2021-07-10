@@ -1,13 +1,5 @@
 ﻿using Harmony;
-using System.Linq;
-using System.Reflection;
-using System.Collections.Generic;
-using BattleTech.Data;
 using BattleTech;
-using JetBrains.Annotations;
-using System.Runtime.Remoting.Messaging;
-using System;
-using UnityEngine;
 
 namespace MapRandomizer.Patches
 {

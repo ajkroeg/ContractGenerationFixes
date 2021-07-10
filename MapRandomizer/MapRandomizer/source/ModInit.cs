@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Harmony;
 using System.Reflection;
 using Newtonsoft.Json;

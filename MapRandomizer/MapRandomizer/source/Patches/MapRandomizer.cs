@@ -1,12 +1,8 @@
 ﻿using Harmony;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 using BattleTech.Data;
 using BattleTech;
-using JetBrains.Annotations;
-using System.Runtime.Remoting.Messaging;
-using System;
 using UnityEngine;
 
 
@@ -162,22 +158,28 @@ namespace MapRandomizer.Patches
 
                         if (ModInit.modSettings.enableTravelFix)
                         {
-                            if (__instance.HasTravelContract==true && ModState.SavedDiffs.ContainsKey(contract.GUID))
+                            if (contract.GUID != null)
                             {
-                                finalDifficulty = ModState.SavedDiffs[contract.GUID];
-                                ModInit.modLog.LogMessage($"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff for {contract.GUID}: {finalDifficulty}");
-                                ModState.SavedDiffs.Remove(contract.GUID);
-                            }
-                            else
-                            {
-                                if (contract.Override.travelOnly)
+                                if (__instance.HasTravelContract == true &&
+                                    ModState.SavedDiffs.ContainsKey(contract.GUID))
                                 {
-                                    ModState.SavedDiffs.Add(contract.GUID, finalDifficulty);
-                                    ModInit.modLog.LogMessage($"Setting future travel contract override finalDifficulty at ModState.LastDiff: {contract.GUID} - {finalDifficulty}");
+                                    finalDifficulty = ModState.SavedDiffs[contract.GUID];
+                                    ModInit.modLog.LogMessage(
+                                        $"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff for {contract.GUID}: {finalDifficulty}");
+                                    ModState.SavedDiffs.Remove(contract.GUID);
+                                }
+                                else
+                                {
+                                    if (contract.Override.travelOnly)
+                                    {
+                                        ModState.SavedDiffs.Add(contract.GUID, finalDifficulty);
+                                        ModInit.modLog.LogMessage(
+                                            $"Setting future travel contract override finalDifficulty at ModState.LastDiff: {contract.GUID} - {finalDifficulty}");
+                                    }
                                 }
                             }
 
-                            
+
                         }
                         contract.SetFinalDifficulty(finalDifficulty);
                         ModInit.modLog.LogMessage($"Setting {contract.Name} finalDifficulty to: {finalDifficulty}");
