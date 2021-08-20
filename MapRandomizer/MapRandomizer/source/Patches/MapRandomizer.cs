@@ -89,31 +89,18 @@ namespace MapRandomizer.Patches
 
 			public static void Postfix(SimGameState __instance, ref bool __result, SimGameState.AddContractData contractData)
 			{
-				if (ModState.IsSystemActionPatch != null)
-				{
-					ModState.IsSystemActionPatch = null;
-				}
-				if (ModState.AddContractBiomes != null)
-				{
-					ModState.AddContractBiomes = null;
-				}
-				if (ModState.IgnoreBiomes != null)
-				{
-					ModState.IgnoreBiomes = null;
-				}
-				if (ModState.SpecMapID !=null)
-				{
-					ModState.SpecMapID = null;
-				}
-				if (ModState.CustomDifficulty != 0)
-	            {
-					ModState.CustomDifficulty = 0;
-                }
-				if (ModState.SysAdjustDifficulty != 0)
-				{
-					ModState.SysAdjustDifficulty = 0;
-				}
-			}
+                ModState.IsSystemActionPatch = null;
+
+				ModState.AddContractBiomes = null;
+
+				ModState.IgnoreBiomes = null;
+
+				ModState.SpecMapID = null;
+
+				ModState.CustomDifficulty = 0;
+
+				ModState.SysAdjustDifficulty = 0;
+            }
 
 		}
 		[HarmonyPatch(typeof(BattleTech.SimGameState), "PrepContract")]
@@ -256,9 +243,9 @@ namespace MapRandomizer.Patches
 					text += "AND m.MapID = @MapID ";
 				}
 				if (!includeUnpublishedContractTypes)
-					{
-					text += "AND ct.IsPublished = 1 ";
-					}
+                {
+                    text += "AND ct.IsPublished = 1 ";
+                }
 				text += "ORDER BY m.FriendlyName";
 				mdd.Query<Map_MDD, EncounterLayer_MDD, MapAndEncounters>(text, delegate (Map_MDD m, EncounterLayer_MDD e)
 				{
