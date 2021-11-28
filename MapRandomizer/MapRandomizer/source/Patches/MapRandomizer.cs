@@ -8,12 +8,20 @@ using UnityEngine;
 
 namespace MapRandomizer.Patches
 {
-	public static class IntegerExtensions
+    public static class Util
+    {
+		public static string GenerateContractQuasiGUID(this Contract contract, FactionValue employer, FactionValue target, int baseDiff, Biome.BIOMESKIN biome, StarSystem system)
+        {
+            var sim = UnityGameInstance.BattleTechGame.Simulation;
+            return $"{contract.GetContractTypeString(sim)}_{contract.Name}_{employer.Name}_{target.Name}_{baseDiff}_{biome}_{system.ID}";
+        }
+    }
+
+    public static class IntegerExtensions
 	{
 		public static int ParseInt(this string value, int defaultIntValue = 0)
 		{
-			int parsedInt;
-			if (int.TryParse(value, out parsedInt))
+            if (int.TryParse(value, out var parsedInt))
 			{
 				return parsedInt;
 			}
@@ -111,31 +119,36 @@ namespace MapRandomizer.Patches
 			public static bool Prefix(SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
 			{
 				{
+
                     ModInit.modLog.LogMessage($"{contract.Name} presetSeed: {presetSeed}");
                     ModInit.modLog.LogMessage($"{contract.Name} contract.IsPriorityContract: {contract.IsPriorityContract}");
                     if (presetSeed != 0 && !contract.IsPriorityContract)
 					{
-						int baseDiff = system.Def.GetDifficulty(__instance.SimGameMode) + Mathf.FloorToInt(__instance.GlobalDifficulty);
-                        ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff}");
+                        int baseDiff = system.Def.GetDifficulty(__instance.SimGameMode) + Mathf.FloorToInt(__instance.GlobalDifficulty);
+
+                        var quid = contract.GenerateContractQuasiGUID(employer, target, baseDiff, skin, system);
+                        ModInit.modLog.LogMessage($"{contract.Name} generated quasi UID: {quid}");
+
+						ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff}");
 						int min;
 						int num;
-						if (ModState.SysAdjustDifficulty != 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(contract.GUID))
+						if (ModState.SysAdjustDifficulty != 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(quid))
 						{
 							baseDiff += ModState.SysAdjustDifficulty;
-                            ModState.SavedDiffOverrides.Add(contract.GUID, baseDiff);
-                            ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after + ModState.SysAdjustDifficulty {ModState.SysAdjustDifficulty}");
+                            ModState.SavedDiffOverrides.Add(quid, baseDiff);
+                            ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after + ModState.SysAdjustDifficulty {ModState.SysAdjustDifficulty}. Added to ModState.SavedDiffOverrides {quid}");
 						}
-						else if(ModState.CustomDifficulty > 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(contract.GUID))
+						else if (ModState.CustomDifficulty > 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(quid))
 						{
 							baseDiff = ModState.CustomDifficulty;
-                            ModState.SavedDiffOverrides.Add(contract.GUID, baseDiff);
-							ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after override from ModState.CustomDifficulty {ModState.CustomDifficulty}");
+                            ModState.SavedDiffOverrides.Add(quid, baseDiff);
+							ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after override from ModState.CustomDifficulty {ModState.CustomDifficulty}. Added to ModState.SavedDiffOverrides {quid}");
 						}
 
-                        if (ModState.SavedDiffOverrides.ContainsKey(contract.GUID))
+                        if (ModState.SavedDiffOverrides.ContainsKey(quid))
                         {
-                            baseDiff = ModState.SavedDiffOverrides[contract.GUID];
-                            ModInit.modLog.LogMessage($"{contract.Name} using baseDiff: {baseDiff} after override from ModState.SavedDiffOverrides {ModState.SavedDiffOverrides[contract.GUID]}");
+                            baseDiff = ModState.SavedDiffOverrides[quid];
+                            ModInit.modLog.LogMessage($"{contract.Name} using baseDiff: {baseDiff} after override from ModState.SavedDiffOverrides {quid}");
 						}
 
 						int contractDifficultyVariance = __instance.Constants.Story.ContractDifficultyVariance;
@@ -154,7 +167,7 @@ namespace MapRandomizer.Patches
 
                         if (ModInit.modSettings.enableTravelFix)
                         {
-                            if (contract.GUID != null)
+                            if (!string.IsNullOrEmpty(contract.GUID))
                             {
                                 if (__instance.HasTravelContract == true &&
                                     ModState.SavedDiffs.ContainsKey(contract.GUID))
@@ -174,8 +187,6 @@ namespace MapRandomizer.Patches
                                     }
                                 }
                             }
-
-
                         }
                         contract.SetFinalDifficulty(finalDifficulty);
                         ModInit.modLog.LogMessage($"Setting {contract.Name} finalDifficulty to: {finalDifficulty}");
