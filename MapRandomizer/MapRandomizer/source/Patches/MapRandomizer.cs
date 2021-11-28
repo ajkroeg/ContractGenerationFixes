@@ -119,16 +119,25 @@ namespace MapRandomizer.Patches
                         ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff}");
 						int min;
 						int num;
-						if (ModState.SysAdjustDifficulty != 0 && ModState.IsSystemActionPatch != null)
+						if (ModState.SysAdjustDifficulty != 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(contract.GUID))
 						{
 							baseDiff += ModState.SysAdjustDifficulty;
+                            ModState.SavedDiffOverrides.Add(contract.GUID, baseDiff);
                             ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after + ModState.SysAdjustDifficulty {ModState.SysAdjustDifficulty}");
 						}
-						else if(ModState.CustomDifficulty > 0 && ModState.IsSystemActionPatch != null)
+						else if(ModState.CustomDifficulty > 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(contract.GUID))
 						{
 							baseDiff = ModState.CustomDifficulty;
-                            ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after override from ModState.CustomDifficulty {ModState.CustomDifficulty}");
+                            ModState.SavedDiffOverrides.Add(contract.GUID, baseDiff);
+							ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after override from ModState.CustomDifficulty {ModState.CustomDifficulty}");
 						}
+
+                        if (ModState.SavedDiffOverrides.ContainsKey(contract.GUID))
+                        {
+                            baseDiff = ModState.SavedDiffOverrides[contract.GUID];
+                            ModInit.modLog.LogMessage($"{contract.Name} using baseDiff: {baseDiff} after override from ModState.SavedDiffOverrides {ModState.SavedDiffOverrides[contract.GUID]}");
+						}
+
 						int contractDifficultyVariance = __instance.Constants.Story.ContractDifficultyVariance;
                         ModInit.modLog.LogMessage($"{contract.Name} contractDifficultyVariance: {contractDifficultyVariance}");
 

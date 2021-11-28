@@ -13,6 +13,7 @@ namespace MapRandomizer
         public static int CustomDifficulty = 0;
         public static int SysAdjustDifficulty = 0;
         public static Dictionary<string, int> SavedDiffs = new Dictionary<string, int>();
+        public static Dictionary<string, int> SavedDiffOverrides = new Dictionary<string, int>();
 
         public static void Reset()
         {
