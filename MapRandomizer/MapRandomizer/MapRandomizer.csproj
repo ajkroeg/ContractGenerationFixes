@@ -67,7 +67,7 @@
     </Compile>
     <Compile Include="source\Logger.cs" />
     <Compile Include="source\ModInit.cs" />
-    <Compile Include="source\Patches\ContractPatch.cs" />
+    <Compile Include="source\Patches\DifficultyPersistancePatches.cs" />
     <Compile Include="source\Patches\MapRandomizer.cs" />
     <Compile Include="source\ModState.cs" />
   </ItemGroup>
