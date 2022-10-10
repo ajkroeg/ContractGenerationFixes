@@ -73,7 +73,7 @@ namespace MapRandomizer.Patches
 		[HarmonyPatch(typeof(BattleTech.SimGameState), "ParseContractActionData")]
 		public static class ParseContractActionData_Patch
 		{
-			public static void Prefix(SimGameState __instance, ref bool __result, string actionValue, string[] additionalValues)
+			public static void Prefix(SimGameState __instance, string actionValue, string[] additionalValues)
 			{
 				ModState.IsSystemActionPatch = actionValue;
 				ModState.SpecMapID = additionalValues.ElementAtOrDefault(4);
@@ -88,7 +88,7 @@ namespace MapRandomizer.Patches
         [HarmonyPatch(typeof(BattleTech.SimGameState), "AddContract")]
 		public static class AddContract_Patch
 		{
-			public static void Prefix(SimGameState __instance, ref bool __result, Dictionary<string, StarSystem> ___starDict, SimGameState.AddContractData contractData)
+			public static void Prefix(SimGameState __instance, Dictionary<string, StarSystem> ___starDict, SimGameState.AddContractData contractData)
 			{
 				StarSystem AddContractSystem;
 				
@@ -109,7 +109,7 @@ namespace MapRandomizer.Patches
 				
 			}
 
-			public static void Postfix(SimGameState __instance, ref bool __result, SimGameState.AddContractData contractData)
+			public static void Postfix(SimGameState __instance, SimGameState.AddContractData contractData)
 			{
                 ModState.IsSystemActionPatch = null;
 
