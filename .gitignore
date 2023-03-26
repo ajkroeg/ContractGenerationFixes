@@ -242,3 +242,6 @@ ModelManifest.xml
 .fake/
 MapRandomizer/MapRandomizer/MapRandomizer.csproj
 MapRandomizer/MapRandomizer/MapRandomizer.sln
+
+# Ignore the VS Directory.build.props file
+Directory.Build.props 
