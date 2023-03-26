@@ -246,11 +246,13 @@ namespace MapRandomizer.Patches
 			{
 				if (ModState.IsSystemActionPatch == null)
 				{
-					return true;
+                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - found flag to skip implementation");
+                    return true;
 				}
 				if (ModState.SpecMapID != null)
 				{
-					ModState.IgnoreBiomes = "TRUE";
+                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - ignore biomes set to TRUE due to {ModState.SpecMapID}");
+                    ModState.IgnoreBiomes = "TRUE";
 				}
 					
 
@@ -266,10 +268,12 @@ namespace MapRandomizer.Patches
 				if (ModState.IgnoreBiomes != "TRUE")
 				{
 					text += "AND bs.BiomeSkinID IN @Name ";
-				}
+                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - enforcing biomes");
+                }
 				if (ModState.SpecMapID != null)
 				{
-					text += "AND m.MapID = @MapID ";
+                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - enforcing SpecMapID");
+                    text += "AND m.MapID = @MapID ";
 				}
 				if (!includeUnpublishedContractTypes)
                 {
@@ -283,10 +287,11 @@ namespace MapRandomizer.Patches
 					{
 						mapAndEncounters = new MapAndEncounters(m);
 						result.Add(mapAndEncounters);
-					}
+                        ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - added MapAndEncounters {string.Join("; ",mapAndEncounters.EncounterFriendlyNames())}");
+                    }
 					mapAndEncounters.AddEncounter(e);
-
-					return mapAndEncounters;
+                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - AddEncounter with mapID {e.MapID} and encounterID {e.EncounterLayerID}");
+                    return mapAndEncounters;
 				}, new
 				{
 					ContractTypeID = contractTypeID,
@@ -295,9 +300,14 @@ namespace MapRandomizer.Patches
 					
 				}, null, true, "MapID", null, null);
 
-				Utilities.Shuffle(result);
+				result.Shuffle();
 				__result = result;
-				return false;
+                foreach (var r in __result)
+                {
+                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - result MapAndEncounters BiomeSkinID {r.Map.BiomeSkinID} {string.Join("; ", r.EncounterFriendlyNames())}");
+                }
+
+                return false;
 			}
 		}
 
