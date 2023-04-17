@@ -1,6 +1,8 @@
 # ContractGenerationFixes
 A small collection of fixes for contract generation in HBS BT. Does not affect procedurally generated contracts or Flashpoints.
 
+**v1.1.0.0 and higher requires modtek v3 or higher**
+
 MapRandomizer fixes a vanilla bug that would result in event-generated contracts always spawning on the same map. Instead, anything that calls the method `AddContract` (primarily events through `System_AddContract` or `System_StartContract`) should now select a random map appropriate to the contract type and biome. Additional values added to `ParseContractActionData` that allow you to force use of a specific map, ignore biome enforcement, and alter difficulty of event-spawned contracts.
 
 Example use of additional values:
