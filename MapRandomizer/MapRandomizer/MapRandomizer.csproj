@@ -4,7 +4,7 @@
   </Target>
   <PropertyGroup Condition="'$(MapRandomizerModPath)' == '' And Exists('$(BattleTechGameDir)\Mods\Core\MapRandomizer')">
     <!-- RogueTech -->
-    <MapRandomizerModPath>$(BattleTechGameDir)\Mods\Core\CollateralDamageCollateralDamage</MapRandomizerModPath>
+    <MapRandomizerModPath>$(BattleTechGameDir)\Mods\Core\MapRandomizer</MapRandomizerModPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(MapRandomizerModPath)' == '' And Exists('$(BattleTechGameDir)\Mods\MapRandomizer')">
     <!-- flat dir -->
