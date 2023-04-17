@@ -1,10 +1,8 @@
-﻿using Harmony;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using BattleTech.Data;
 using BattleTech;
 using UnityEngine;
-
 
 namespace MapRandomizer.Patches
 {
@@ -130,8 +128,9 @@ namespace MapRandomizer.Patches
         [HarmonyPriority(Priority.Last)]
 		public static class PrepContractPatch
         {
-            public static bool Prefix(SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
-			{
+            public static void Prefix(ref bool __runOriginal, SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
+            {
+                if (!__runOriginal) return;
                 ModInit.modLog.LogMessage($"{contract.Name} presetSeed: {presetSeed}");
                 ModInit.modLog.LogMessage($"{contract.Name} contract.IsPriorityContract: {contract.IsPriorityContract}");
                 if (presetSeed != 0 && !contract.IsPriorityContract)
@@ -234,28 +233,29 @@ namespace MapRandomizer.Patches
 				contract.SetInitialReward(num2);
 				contract.SetBiomeSkin(skin);
 			
-			return false;
-			}
+			__runOriginal = false;
+            return;
+            }
 		}
 
         [HarmonyPatch(typeof(BattleTech.Data.MapsAndEncounters_MDDExtensions), "GetReleasedMapsAndEncountersByContractTypeAndOwnership")]
 		public static class GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch
 		{
-			public static bool Prefix(ref List<MapAndEncounters> __result, MetadataDatabase mdd, int contractTypeID, bool includeUnpublishedContractTypes)
+			public static void Prefix(ref bool __runOriginal, ref List<MapAndEncounters> __result, MetadataDatabase mdd, int contractTypeID, bool includeUnpublishedContractTypes)
+            {
 
-			{
-				if (ModState.IsSystemActionPatch == null)
+				if (string.IsNullOrEmpty(ModState.IsSystemActionPatch))
 				{
                     ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - found flag to skip implementation");
-                    return true;
-				}
-				if (ModState.SpecMapID != null)
+                    __runOriginal = true;
+                    return;
+                }
+				if (string.IsNullOrEmpty(ModState.SpecMapID))
 				{
                     ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - ignore biomes set to TRUE due to {ModState.SpecMapID}");
                     ModState.IgnoreBiomes = "TRUE";
 				}
-					
-
+                
 				List<MapAndEncounters> result = new List<MapAndEncounters>();
 				string text = "SELECT m.*, el.* FROM EncounterLayer AS el ";
 				text += "INNER JOIN ContractType as ct ON el.ContractTypeId = ct.ContractTypeId ";
@@ -307,8 +307,9 @@ namespace MapRandomizer.Patches
                     ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - result MapAndEncounters BiomeSkinID {r.Map.BiomeSkinID} {string.Join("; ", r.EncounterFriendlyNames())}");
                 }
 
-                return false;
-			}
+                __runOriginal = false;
+                return;
+            }
 		}
 
 	}

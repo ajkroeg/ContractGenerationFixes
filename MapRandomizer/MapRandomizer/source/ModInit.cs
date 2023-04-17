@@ -1,5 +1,4 @@
 ﻿using System;
-using Harmony;
 using System.Reflection;
 using Newtonsoft.Json;
 
@@ -28,8 +27,9 @@ namespace MapRandomizer
             
 
             ModInit.modLog.LogMessage($"Initializing {HarmonyPackage} - Version {typeof(Settings).Assembly.GetName().Version}");
-            var harmony = HarmonyInstance.Create(HarmonyPackage);
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            //var harmony = HarmonyInstance.Create(HarmonyPackage);
+            //harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), HarmonyPackage);
 
         }
     }
