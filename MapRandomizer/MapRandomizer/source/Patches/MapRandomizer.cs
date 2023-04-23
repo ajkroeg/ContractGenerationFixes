@@ -250,7 +250,7 @@ namespace MapRandomizer.Patches
                     __runOriginal = true;
                     return;
                 }
-				if (string.IsNullOrEmpty(ModState.SpecMapID))
+				if (!string.IsNullOrEmpty(ModState.SpecMapID))
 				{
                     ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - ignore biomes set to TRUE due to {ModState.SpecMapID}");
                     ModState.IgnoreBiomes = "TRUE";
