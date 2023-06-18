@@ -25,21 +25,21 @@ namespace MapRandomizer.source.Patches
         [HarmonyPatch(typeof(SimGameState), "Rehydrate", new Type[] {typeof(GameInstanceSave)})]
         public static class SGS_Rehydrate_Patch
         {
-           public static void Postfix(SimGameState __instance) 
-           {
-               foreach (var statistic in __instance.CompanyStats)
-               {
-                   if (statistic.Key.StartsWith("MR_DIFFICULTY_"))
-                   {
-                       ModState.SavedDiffOverrides.Add(statistic.Key, statistic.Value.Value<int>());
-                   }
-               }
+            public static void Postfix(SimGameState __instance)
+            {
+                foreach (var statistic in __instance.CompanyStats)
+                {
+                    if (statistic.Key.StartsWith("MR_DIFFICULTY_"))
+                    {
+                        ModState.SavedDiffOverrides.Add(statistic.Key, statistic.Value.Value<int>());
+                    }
+                }
 
-               foreach (var statOverride in ModState.SavedDiffOverrides)
-               {
-                   __instance.CompanyStats.RemoveStatistic(statOverride.Key);
-               }
-           }
+                foreach (var statOverride in ModState.SavedDiffOverrides)
+                {
+                    __instance.CompanyStats.RemoveStatistic(statOverride.Key);
+                }
+            }
         }
 
         [HarmonyPatch(typeof(Contract), "CompleteContract", new Type[] {typeof(MissionResult), typeof(bool)})]

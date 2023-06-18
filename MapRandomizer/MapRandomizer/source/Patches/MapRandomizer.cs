@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BattleTech.Data;
 using BattleTech;
 using UnityEngine;
+using MapRandomizer.source;
 
 namespace MapRandomizer.Patches
 {
@@ -79,7 +80,7 @@ namespace MapRandomizer.Patches
 				ModState.CustomDifficulty = additionalValues.ElementAtOrDefault(6).ParseInt();
 				ModState.SysAdjustDifficulty = additionalValues.ElementAtOrDefault(7).ParseInt();
 
-                ModInit.modLog.LogMessage($"[ParseContractActionData] Parsed override values: IsSystemActionPatch: {ModState.IsSystemActionPatch}\nSpecMapID:{ModState.SpecMapID}\nIgnoreBiomes: {ModState.IgnoreBiomes}\nCustomDifficulty: {ModState.CustomDifficulty}\nSysAdjustDifficulty: {ModState.SysAdjustDifficulty}");
+                ModInit.modLog?.Info?.Write($"[ParseContractActionData] Parsed override values: IsSystemActionPatch: {ModState.IsSystemActionPatch}\nSpecMapID:{ModState.SpecMapID}\nIgnoreBiomes: {ModState.IgnoreBiomes}\nCustomDifficulty: {ModState.CustomDifficulty}\nSysAdjustDifficulty: {ModState.SysAdjustDifficulty}");
 			}
 		}
 
@@ -131,50 +132,50 @@ namespace MapRandomizer.Patches
             public static void Prefix(ref bool __runOriginal, SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
             {
                 if (!__runOriginal) return;
-                ModInit.modLog.LogMessage($"{contract.Name} presetSeed: {presetSeed}");
-                ModInit.modLog.LogMessage($"{contract.Name} contract.IsPriorityContract: {contract.IsPriorityContract}");
+                ModInit.modLog?.Info?.Write($"{contract.Name} presetSeed: {presetSeed}");
+                ModInit.modLog?.Info?.Write($"{contract.Name} contract.IsPriorityContract: {contract.IsPriorityContract}");
                 if (presetSeed != 0 && !contract.IsPriorityContract)
 				{
                     int baseDiff = system.Def.GetDifficulty(__instance.SimGameMode) + Mathf.FloorToInt(__instance.GlobalDifficulty);
 
                     var quid = contract.GenerateContractQuasiGUID(employer, target, baseDiff, skin, system);
-                    ModInit.modLog.LogMessage($"{contract.Name} generated quasi UID: {quid}");
+                    ModInit.modLog?.Info?.Write($"{contract.Name} generated quasi UID: {quid}");
 
-					ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff}");
+					ModInit.modLog?.Info?.Write($"{contract.Name} baseDiff: {baseDiff}");
 					int min;
 					int num;
 					if (ModState.SysAdjustDifficulty != 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(quid))
 					{
 						baseDiff += ModState.SysAdjustDifficulty;
                         ModState.SavedDiffOverrides.Add(quid, baseDiff);
-                        ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after + ModState.SysAdjustDifficulty {ModState.SysAdjustDifficulty}. Added to ModState.SavedDiffOverrides {quid}");
+                        ModInit.modLog?.Info?.Write($"{contract.Name} baseDiff: {baseDiff} after + ModState.SysAdjustDifficulty {ModState.SysAdjustDifficulty}. Added to ModState.SavedDiffOverrides {quid}");
 					}
 					else if (ModState.CustomDifficulty > 0 && ModState.IsSystemActionPatch != null && !ModState.SavedDiffOverrides.ContainsKey(quid))
 					{
 						baseDiff = ModState.CustomDifficulty;
                         ModState.SavedDiffOverrides.Add(quid, baseDiff);
-						ModInit.modLog.LogMessage($"{contract.Name} baseDiff: {baseDiff} after override from ModState.CustomDifficulty {ModState.CustomDifficulty}. Added to ModState.SavedDiffOverrides {quid}");
+						ModInit.modLog?.Info?.Write($"{contract.Name} baseDiff: {baseDiff} after override from ModState.CustomDifficulty {ModState.CustomDifficulty}. Added to ModState.SavedDiffOverrides {quid}");
 					}
 
                     if (ModState.SavedDiffOverrides.ContainsKey(quid))
                     {
                         baseDiff = ModState.SavedDiffOverrides[quid];
-                        ModInit.modLog.LogMessage($"{contract.Name} using baseDiff: {baseDiff} after override from ModState.SavedDiffOverrides {quid}");
+                        ModInit.modLog?.Info?.Write($"{contract.Name} using baseDiff: {baseDiff} after override from ModState.SavedDiffOverrides {quid}");
 					}
 
 					int contractDifficultyVariance = __instance.Constants.Story.ContractDifficultyVariance;
-                    ModInit.modLog.LogMessage($"{contract.Name} contractDifficultyVariance: {contractDifficultyVariance}");
+                    ModInit.modLog?.Info?.Write($"{contract.Name} contractDifficultyVariance: {contractDifficultyVariance}");
 
 					min = Mathf.Max(1, baseDiff - contractDifficultyVariance);
-                    ModInit.modLog.LogMessage($"{contract.Name}: [min = Mathf.Max(1, baseDiff - contractDifficultyVariance)] min: {min}");
+                    ModInit.modLog?.Info?.Write($"{contract.Name}: [min = Mathf.Max(1, baseDiff - contractDifficultyVariance)] min: {min}");
 					num = Mathf.Max(1, baseDiff + contractDifficultyVariance);
-                    ModInit.modLog.LogMessage($"{contract.Name}: [max = Mathf.Max(1, baseDiff + contractDifficultyVariance)] max: {num}");
+                    ModInit.modLog?.Info?.Write($"{contract.Name}: [max = Mathf.Max(1, baseDiff + contractDifficultyVariance)] max: {num}");
 
 					int finalDifficulty = new NetworkRandom
 					{
 						seed = presetSeed
 					}.Int(min, num + 1);
-                    ModInit.modLog.LogMessage($"{contract.Name} finalDifficulty = random between min and max+1: {min} and {num+1}: {finalDifficulty}");
+                    ModInit.modLog?.Info?.Write($"{contract.Name} finalDifficulty = random between min and max+1: {min} and {num+1}: {finalDifficulty}");
 
                     if (ModInit.modSettings.enableTravelFix)
                     {
@@ -184,7 +185,7 @@ namespace MapRandomizer.Patches
                                 ModState.SavedDiffs.ContainsKey(contract.GUID))
                             {
                                 finalDifficulty = ModState.SavedDiffs[contract.GUID];
-                                ModInit.modLog.LogMessage(
+                                ModInit.modLog?.Info?.Write(
                                     $"Found Travel Contract: {contract.Name}, using override finalDifficulty from ModState.LastDiff for {contract.GUID}: {finalDifficulty}");
                                 ModState.SavedDiffs.Remove(contract.GUID);
                             }
@@ -193,14 +194,14 @@ namespace MapRandomizer.Patches
                                 if (contract.Override.travelOnly)
                                 {
                                     ModState.SavedDiffs.Add(contract.GUID, finalDifficulty);
-                                    ModInit.modLog.LogMessage(
+                                    ModInit.modLog?.Info?.Write(
                                         $"Setting future travel contract override finalDifficulty at ModState.LastDiff: {contract.GUID} - {finalDifficulty}");
                                 }
                             }
                         }
                     }
                     contract.SetFinalDifficulty(finalDifficulty);
-                    ModInit.modLog.LogMessage($"Setting {contract.Name} finalDifficulty to: {finalDifficulty}");
+                    ModInit.modLog?.Info?.Write($"Setting {contract.Name} finalDifficulty to: {finalDifficulty}");
 				}
 				
 				FactionValue player1sMercUnitFactionValue = FactionEnumeration.GetPlayer1sMercUnitFactionValue();
@@ -220,16 +221,16 @@ namespace MapRandomizer.Patches
 				if (contract.Override.contractRewardOverride >= 0)
 				{
 					num2 = contract.Override.contractRewardOverride;
-                    ModInit.modLog.LogMessage($"Using {num2} for contract reward override");
+                    ModInit.modLog?.Info?.Write($"Using {num2} for contract reward override");
                 }
 
 				else
 				{
 					num2 = __instance.CalculateContractValueByContractType(contract.ContractTypeValue, finalDifficulty2, (float)__instance.Constants.Finances.ContractPricePerDifficulty, __instance.Constants.Finances.ContractPriceVariance, presetSeed);
-                    ModInit.modLog.LogMessage($"Calculated contract Value using Contract.CalculateContractValueByContractType");
+                    ModInit.modLog?.Info?.Write($"Calculated contract Value using Contract.CalculateContractValueByContractType");
 				}
 				num2 = SimGameState.RoundTo((float)num2, 1000);
-                ModInit.modLog.LogMessage($"Final contract value: {num2}");
+                ModInit.modLog?.Info?.Write($"Final contract value: {num2}");
 				contract.SetInitialReward(num2);
 				contract.SetBiomeSkin(skin);
 			
@@ -246,13 +247,13 @@ namespace MapRandomizer.Patches
 
 				if (string.IsNullOrEmpty(ModState.IsSystemActionPatch))
 				{
-                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - found flag to skip implementation");
+                    ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - found flag to skip implementation");
                     __runOriginal = true;
                     return;
                 }
 				if (!string.IsNullOrEmpty(ModState.SpecMapID))
 				{
-                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - ignore biomes set to TRUE due to {ModState.SpecMapID}");
+                    ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - ignore biomes set to TRUE due to {ModState.SpecMapID}");
                     ModState.IgnoreBiomes = "TRUE";
 				}
                 
@@ -268,11 +269,11 @@ namespace MapRandomizer.Patches
 				if (ModState.IgnoreBiomes != "TRUE")
 				{
 					text += "AND bs.BiomeSkinID IN @Name ";
-                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - enforcing biomes");
+                    ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - enforcing biomes");
                 }
 				if (ModState.SpecMapID != null)
 				{
-                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - enforcing SpecMapID");
+                    ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - enforcing SpecMapID");
                     text += "AND m.MapID = @MapID ";
 				}
 				if (!includeUnpublishedContractTypes)
@@ -287,10 +288,10 @@ namespace MapRandomizer.Patches
 					{
 						mapAndEncounters = new MapAndEncounters(m);
 						result.Add(mapAndEncounters);
-                        ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - added MapAndEncounters {string.Join("; ",mapAndEncounters.EncounterFriendlyNames())}");
+                        ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - added MapAndEncounters {string.Join("; ",mapAndEncounters.EncounterFriendlyNames())}");
                     }
 					mapAndEncounters.AddEncounter(e);
-                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - AddEncounter with mapID {e.MapID} and encounterID {e.EncounterLayerID}");
+                    ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - AddEncounter with mapID {e.MapID} and encounterID {e.EncounterLayerID}");
                     return mapAndEncounters;
 				}, new
 				{
@@ -304,7 +305,7 @@ namespace MapRandomizer.Patches
 				__result = result;
                 foreach (var r in __result)
                 {
-                    ModInit.modLog.LogMessage($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - result MapAndEncounters BiomeSkinID {r.Map.BiomeSkinID} {string.Join("; ", r.EncounterFriendlyNames())}");
+                    ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - result MapAndEncounters BiomeSkinID {r.Map.BiomeSkinID} {string.Join("; ", r.EncounterFriendlyNames())}");
                 }
 
                 __runOriginal = false;

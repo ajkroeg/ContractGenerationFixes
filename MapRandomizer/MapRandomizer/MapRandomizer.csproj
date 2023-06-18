@@ -34,9 +34,15 @@
   <PropertyGroup>
     <!-- avoids IgnoresAccessChecksToAttribute warnings -->
     <PublicizerRuntimeStrategies>Unsafe</PublicizerRuntimeStrategies>
-    <AssemblyVersion>1.1.0.1</AssemblyVersion>
-    <FileVersion>1.1.0.1</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="source\Logger.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source\Logger.cs" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer" Version="2.2.1" />
     <Publicize Include="Assembly-CSharp" />
@@ -50,6 +56,12 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <Private>False</Private>
+    </Reference>
+	<Reference Include="Assembly-CSharp-firstpass">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="IRBTModUtils">
+      <HintPath>$(MapRandomizerModPath)\..\IRBTModUtils\IRBTModUtils.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <Private>False</Private>
@@ -67,6 +79,9 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
+      <Private>False</Private>
+    </Reference>
+	<Reference Include="UnityEngine.UI" Publicize="true">
       <Private>False</Private>
     </Reference>
   </ItemGroup>

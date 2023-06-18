@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using BattleTech;
+using BattleTech.Framework;
+using HBS.Collections;
+using Newtonsoft.Json.Linq;
+using static MapRandomizer.source.Classes;
 
 namespace MapRandomizer
 {
-
     public static class ModState
     {
-        
         public static string IsSystemActionPatch = null;
         public static List<Biome.BIOMESKIN> AddContractBiomes = null;
         public static string SpecMapID = null;
@@ -25,6 +29,48 @@ namespace MapRandomizer
             SysAdjustDifficulty = 0;
             SavedDiffs = new Dictionary<string, int>();
         }
+    }
+    public static class OverrideExtensionManager
+    {
+        public static PendingContractOverrideExtension PendingExtension = new PendingContractOverrideExtension();
 
+        public static ConcurrentDictionary<string, ContractOverrideExtension> ContractOverrideExtensionDict = new ConcurrentDictionary<string, ContractOverrideExtension>();
+        public static bool GetContractOverrideExtension(this ContractOverride contractOverride, out ContractOverrideExtension extension)
+        {
+            extension = new ContractOverrideExtension();
+            if (contractOverride.ID == null) contractOverride.FullRehydrate();
+            if (contractOverride.ID == null) return false;
+            if (ContractOverrideExtensionDict.TryGetValue(contractOverride.ID, out var contractOverrideExtension))
+            {
+                extension = contractOverrideExtension;
+                return true;
+            }
+            return false;
+        }
+
+        public static void ResetContractExtension()
+        {
+            PendingExtension = new PendingContractOverrideExtension();
+        }
+
+        public static SimGameEventResult ProcessExpirationResult(this JObject jObject)
+        {
+            var simResult = new SimGameEventResult();
+
+            simResult.Scope = jObject["Scope"].ToObject<EventScope>();
+            simResult.Requirements = jObject["Requirements"].ToObject<RequirementDef>();
+            simResult.AddedTags = new TagSet();
+            simResult.AddedTags.FromJSON(jObject["AddedTags"].ToString());
+            simResult.RemovedTags = new TagSet();
+            simResult.RemovedTags.FromJSON(jObject["RemovedTags"].ToString());
+
+            simResult.Stats = jObject["Stats"].ToObject<SimGameStat[]>();
+            simResult.Actions = jObject["Actions"].ToObject<SimGameResultAction[]>();
+            simResult.ForceEvents = jObject["ForceEvents"].ToObject<SimGameForcedEvent[]>();
+            simResult.TemporaryResult = jObject["TemporaryResult"].ToObject<bool>();
+            simResult.ResultDuration = jObject["ResultDuration"].ToObject<int>();
+
+            return simResult;
+        }
     }
 }
