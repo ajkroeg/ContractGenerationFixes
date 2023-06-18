@@ -1,7 +1,7 @@
 # ContractGenerationFixes
 A small collection of fixes and extensions for contracts in HBS BT.
 
-**v1.2.0.0 and higher require the latest IRBTModUtils: https://github.com/BattletechModders/IRBTModUtils/releases**
+**v1.2.0.0 and higher require the latest IRBTModUtils: https://github.com/BattletechModders/IRBTModUtils/releases **
 **v1.1.0.0 and higher requires modtek v3 or higher**
 
 ### The new sexy
