@@ -1,6 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
 using BattleTech;
 using BattleTech.Data;
+using BattleTech.Framework;
+using BattleTech.Save.SaveGameStructure;
+using HBS.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SVGImporter;
@@ -33,6 +38,50 @@ namespace MapRandomizer.source
 
     public static class Utils
     {
+        public static bool IDRehydratePredicate(string memberName)
+        {
+            return memberName == "ID";
+        }
+        public static string FetchCachedOverrideID(this ContractOverride contractOverride)
+        {
+            if (!string.IsNullOrEmpty(contractOverride.ID)) return contractOverride.ID;
+            if (ModState.OverrideIDCache.TryGetValue(contractOverride, out var cachedID)) return cachedID;
+            if (string.IsNullOrEmpty(contractOverride.cachedJson))
+            {
+                foreach (var result in contractOverride.OnContractSuccessResults)
+                {
+                    if (result.Actions != null)
+                    {
+                        SimGameResultAction[] actions = result.Actions;
+                        for (int i = 0; i < actions.Length; i++)
+                        {
+                            if (actions[i].Type == SimGameResultAction.ActionType.System_StartNonProceduralContract)
+                            {
+                                if (actions[i].additionalValues.Length > 3)
+                                {
+                                    if (!string.IsNullOrEmpty(actions[i].additionalValues[3]))
+                                        return actions[i].additionalValues[3];
+                                }
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+
+            var deserializedOverride = new ContractOverride();
+
+            JSONSerializationUtility.FromJSON<ContractOverride>(contractOverride, contractOverride.cachedJson, new Func<string, bool>[]
+            {
+                new Func<string, bool>(IDRehydratePredicate)
+            });
+            ModState.OverrideIDCache.Add(contractOverride, deserializedOverride.ID);
+            return deserializedOverride.ID;
+            //JSONSerializationUtility.FromJSON<ContractOverride>(deserializedOverride, contractOverride.cachedJson);
+            //deserializedOverride.UpgradeToDataDrivenEnums();
+            //contractOverride.ID = deserializedOverride.ID;
+        }
+
         public static void ForceTakeContractExpiration(this SimGameState sim, Contract contract)
         {
             if (sim.CompletedContract != null)

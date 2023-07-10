@@ -53,6 +53,7 @@ namespace MapRandomizer.source.Patches
                 if (__result)
                 {
                     contractWidget.ListContracts(sim.GetAllCurrentlySelectableContracts(true), null);
+                    
                     if (__instance.Override.GetContractOverrideExtension(out var extension))
                     {
                         if (extension.ResultsOnExpiration.Count > 0)
@@ -87,8 +88,9 @@ namespace MapRandomizer.source.Patches
                         
                         foreach (var entry in sim.RoomManager.timelineWidget.ActiveItems)
                         {
+                            var overrideID = __instance.Override.FetchCachedOverrideID();
                             if (entry.Key is Classes.WorkOrderEntry_Notification_Timed timed &&
-                                entry.Key.ID == $"{__instance.Override.ID}_TimeLeft")
+                                entry.Key.ID == $"{overrideID}_TimeLeft")
                             {
                                 timed.PayCost(1);
                                 if (timed.IsCostPaid())
@@ -106,6 +108,7 @@ namespace MapRandomizer.source.Patches
             new Type[] { typeof(string), typeof(string), typeof(string), typeof(ContractTypeValue), typeof(GameInstance), typeof(ContractOverride), typeof(GameContext), typeof(bool), typeof(int), typeof(int), typeof(int?) })]
         public static class Contract_Constructor_Long
         {
+            static bool Prepare() => true;
             public static void Postfix(Contract __instance, string mapName, string mapPath, string encounterLayerGuid, ContractTypeValue contractTypeValue, GameInstance game, ContractOverride contractOverride, GameContext baseContext, bool fromSim = false, int difficulty = -1, int initialContractValue = 0, int? playerOneMoraleOverride = null)
             {
                 var sim = UnityGameInstance.BattleTechGame.Simulation;
@@ -123,20 +126,22 @@ namespace MapRandomizer.source.Patches
         [HarmonyPatch(typeof(ContractOverride), "CopyContractTypeData", new Type[] { typeof(ContractOverride) })]
         public static class ContractOverride_CopyContractTypeData
         {
+            static bool Prepare() => true;
             public static void Postfix(ContractOverride __instance, ContractOverride ovr)
             {
                 __instance.usesExpiration = ovr.usesExpiration;
                 __instance.expirationTimeOverride = ovr.expirationTimeOverride;
-                if (!string.IsNullOrEmpty(ovr.ID) && string.IsNullOrEmpty(__instance.ID))
-                {
-                    __instance.ID = ovr.ID;
-                }
+                //if (!string.IsNullOrEmpty(ovr.ID) && string.IsNullOrEmpty(__instance.ID))
+                //{
+                //    __instance.ID = ovr.ID;
+                //}
             }
         }
 
         [HarmonyPatch(typeof(SGContractsListItem), "Init", new Type[] { typeof(Contract), typeof(SimGameState) })]
         public static class SGContractsListItem_Postfix
         {
+            static bool Prepare() => true;
             public static void Postfix(SGContractsListItem __instance, Contract contract, SimGameState sim)
             {
                 if (contract.UsingExpiration && __instance.expirationElement == null)
