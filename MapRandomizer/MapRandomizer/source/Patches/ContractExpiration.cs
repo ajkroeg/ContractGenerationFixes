@@ -75,11 +75,18 @@ namespace MapRandomizer.source.Patches
                     if (__instance == contractElement.Contract && contractElement.Contract.UsingExpiration)
                     {
                         var expirationElement = contractElement.expirationElement;//Traverse.Create(contractElement).Field("expirationElement").GetValue<GameObject>();
+                        var title = $"Time-Limited Contract!";
+                        var details = $"This contract will expire in {contractElement.Contract.ExpirationTime} days!";
+                        if (contractElement.Contract.Override.GetContractOverrideExtension(out var extension))
+                        {
+                            if (extension.ForceStartOnExpiration)
+                            {
+                                details = $"Countdown: Contract will launch in {contractElement.Contract.ExpirationTime} days!";
+                            }
+                        }
                         if (expirationElement != null)
                         {
                             var tooltipComponent = expirationElement.gameObject.GetComponent<HBSTooltip>();
-                            var title = $"Time-Limited Contract!";
-                            var details = $"This contract will expire in {contractElement.Contract.ExpirationTime} days!";
                             BaseDescriptionDef def =
                                 new BaseDescriptionDef("ContractExpirationData", title, details, null);
                             tooltipComponent.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def));
@@ -145,8 +152,16 @@ namespace MapRandomizer.source.Patches
             public static void Postfix(SGContractsListItem __instance, Contract contract, SimGameState sim)
             {
                 if (contract.UsingExpiration && __instance.expirationElement == null)
-
                 {
+                    var title = $"Time-Limited Contract!";
+                    var details = $"This contract will expire in {contract.ExpirationTime} days!";
+                    if (contract.Override.GetContractOverrideExtension(out var extension))
+                    {
+                        if (extension.ForceStartOnExpiration)
+                        {
+                            details = $"Countdown: Contract will launch in {contract.ExpirationTime} days!";
+                        }
+                    }
                     var timeLimitIcon =
                         UnityEngine.Object.Instantiate<GameObject>(__instance.travelIndicator,
                             __instance.travelIndicator.transform.parent);
@@ -161,8 +176,6 @@ namespace MapRandomizer.source.Patches
                     iconComponent.vectorGraphics = asset;
 
                     var tooltipComponent = timeLimitIcon.gameObject.GetComponent<HBSTooltip>();
-                    var title = $"Time-Limited Contract!";
-                    var details = $"This contract will expire in {contract.ExpirationTime} days!";
                     BaseDescriptionDef def = new BaseDescriptionDef("ContractExpirationData", title, details, null);
                     tooltipComponent.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(def));
                     __instance.expirationElement = timeLimitIcon;
