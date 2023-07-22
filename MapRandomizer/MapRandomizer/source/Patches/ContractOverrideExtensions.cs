@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BattleTech.Data;
 using BattleTech.Framework;
+using HBS.Logging;
 using IRBTModUtils;
 using static MapRandomizer.source.Classes;
 using UnityEngine;
@@ -41,7 +42,7 @@ namespace MapRandomizer.source.Patches
                         if (resultJO == null) continue;
                         var result = resultJO.ProcessExpirationResult();
                         results.Add(result);
-                        ModInit.modLog?.Trace?.Write($"[TRACE] Processed result with scope {result.Scope}");
+                        ModInit.modLog.LogAtLevel((LogLevel)200,$"[TRACE] Processed result with scope {result.Scope}");
                     }
                     state.ResultsOnExpiration = results;
                     contracOverrideJO.Remove("ResultsOnExpiration");
@@ -57,7 +58,7 @@ namespace MapRandomizer.source.Patches
                         var effectData = new EffectData();
                         effectData.FromJSON(effectJO.ToString());
                         effectDatas.Add(effectData);
-                        ModInit.modLog?.Trace?.Write($"[TRACE] Processed effectData with Id {effectData.Description.Id}");
+                        ModInit.modLog.LogAtLevel((LogLevel)200,$"[TRACE] Processed effectData with Id {effectData.Description.Id}");
                     }
                     state.UniversalContractEffects = effectDatas;
                     contracOverrideJO.Remove("UniversalContractEffects");
@@ -65,7 +66,7 @@ namespace MapRandomizer.source.Patches
 
                 OverrideExtensionManager.PendingExtension.Extension = state;
                 json = contracOverrideJO.ToString(Formatting.Indented);
-                ModInit.modLog?.Trace?.Write($"[TRACE] ContractOverride_FromJSON PREFIX RAN");
+                ModInit.modLog.LogAtLevel((LogLevel)200,$"[TRACE] ContractOverride_FromJSON PREFIX RAN");
             }
         }
 
@@ -97,7 +98,7 @@ namespace MapRandomizer.source.Patches
                         if (resultJO == null) continue;
                         var result = resultJO.ProcessExpirationResult();
                         results.Add(result);
-                        ModInit.modLog?.Trace?.Write($"[TRACE] Processed result with scope {result.Scope}");
+                        ModInit.modLog.LogAtLevel((LogLevel)200,$"[TRACE] Processed result with scope {result.Scope}");
                     }
                     state.ResultsOnExpiration = results;
                     contracOverrideJO.Remove("ResultsOnExpiration");
@@ -113,7 +114,7 @@ namespace MapRandomizer.source.Patches
                         var effectData = new EffectData();
                         effectData.FromJSON(effectJO.ToString());
                         effectDatas.Add(effectData);
-                        ModInit.modLog?.Trace?.Write($"[TRACE] Processed effectData with Id {effectData.Description.Id}");
+                        ModInit.modLog.LogAtLevel((LogLevel)200,$"[TRACE] Processed effectData with Id {effectData.Description.Id}");
                     }
                     state.UniversalContractEffects = effectDatas;
                     contracOverrideJO.Remove("UniversalContractEffects");
@@ -121,10 +122,10 @@ namespace MapRandomizer.source.Patches
 
                 OverrideExtensionManager.PendingExtension.Extension = state;
                 //json = contracOverrideJO.ToString(Formatting.Indented);
-                ModInit.modLog?.Trace?.Write($"[TRACE] DataManagerContractOverrideLoadRequest__OnLoadedWithJSON POSTFIXING");
+                ModInit.modLog.LogAtLevel((LogLevel)200,$"[TRACE] DataManagerContractOverrideLoadRequest__OnLoadedWithJSON POSTFIXING");
 
                 OverrideExtensionManager.ContractOverrideExtensionDict.AddOrUpdate(__instance.resourceId, OverrideExtensionManager.PendingExtension?.Extension, (k, v) => OverrideExtensionManager.PendingExtension?.Extension);
-                ModInit.modLog?.Trace?.Write($"[TRACE] DataManagerContractOverrideLoadRequest__OnLoadedWithJSON - added {__instance.resourceId} to dict with values ForceStartOnExpiration [{OverrideExtensionManager.PendingExtension?.Extension?.ForceStartOnExpiration}]\rResultsOnExpiration [{OverrideExtensionManager.PendingExtension?.Extension?.ResultsOnExpiration?.Count}]\rUniversalContractEffects [{OverrideExtensionManager.PendingExtension?.Extension?.UniversalContractEffects?.Count}]");
+                ModInit.modLog.LogAtLevel((LogLevel)200,$"[TRACE] DataManagerContractOverrideLoadRequest__OnLoadedWithJSON - added {__instance.resourceId} to dict with values ForceStartOnExpiration [{OverrideExtensionManager.PendingExtension?.Extension?.ForceStartOnExpiration}]\rResultsOnExpiration [{OverrideExtensionManager.PendingExtension?.Extension?.ResultsOnExpiration?.Count}]\rUniversalContractEffects [{OverrideExtensionManager.PendingExtension?.Extension?.UniversalContractEffects?.Count}]");
                 OverrideExtensionManager.ResetContractExtension();
             }
         }

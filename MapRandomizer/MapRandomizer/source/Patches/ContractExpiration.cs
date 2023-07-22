@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using SVGImporter;
+using HBS.Logging;
 
 namespace MapRandomizer.source.Patches
 {
@@ -47,7 +48,7 @@ namespace MapRandomizer.source.Patches
                 var contractWidget = sim.RoomManager.CmdCenterRoom.contractsWidget;//Traverse.Create(sim.RoomManager.CmdCenterRoom).Field("contractsWidget").GetValue<SGContractsWidget>();
                 if (__instance.UsingExpiration)
                 {
-                    ModInit.modLog?.Info?.Write($"[Contract_OnDayPassed] - Contract {__instance?.Name} using expiration; {__instance.ExpirationTime} remaining.");
+                    ModInit.modLog.LogAtLevel(LogLevel.Log,$"[Contract_OnDayPassed] - Contract {__instance?.Name} using expiration; {__instance.ExpirationTime} remaining.");
                 }
 
                 if (__result)
