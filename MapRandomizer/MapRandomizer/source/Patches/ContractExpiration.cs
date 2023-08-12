@@ -36,6 +36,20 @@ namespace MapRandomizer.source.Patches
             }
         }
 
+        [HarmonyPatch(typeof(Flashpoint), "OnDayPassed", new Type[] { })]
+        public static class Flashpoint_OnDayPassed
+        {
+            static bool Prepare() => true;
+
+            public static void Postfix(Flashpoint __instance)
+            {
+                if (__instance.ActiveContract != null)
+                {
+                    __instance.ActiveContract.OnDayPassed();
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(Contract), "OnDayPassed", new Type[] { })]
         public static class Contract_OnDayPassed
         {
