@@ -31,6 +31,7 @@ namespace MapRandomizer
             CustomDifficulty = 0;
             SysAdjustDifficulty = 0;
             SavedDiffs = new Dictionary<string, int>();
+            SavedDiffOverrides = new Dictionary<string, int>();
         }
     }
     public static class OverrideExtensionManager

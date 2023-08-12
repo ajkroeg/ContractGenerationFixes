@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BattleTech;
 using BattleTech.Save;
 using BattleTech.Save.Test;
@@ -27,6 +28,7 @@ namespace MapRandomizer.source.Patches
         {
             public static void Postfix(SimGameState __instance)
             {
+                ModState.Reset();
                 foreach (var statistic in __instance.CompanyStats)
                 {
                     if (statistic.Key.StartsWith("MR_DIFFICULTY_"))
