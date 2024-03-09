@@ -4,6 +4,7 @@ using BattleTech.Data;
 using BattleTech;
 using UnityEngine;
 using MapRandomizer.source;
+using BattleTech.Save.SaveGameStructure;
 
 namespace MapRandomizer.Patches
 {
@@ -57,6 +58,7 @@ namespace MapRandomizer.Patches
         {
             public static void Postfix(SimGameState __instance, int timeLapse)
             {
+                if (__instance.IsCampaign) return;
                 __instance.CompanyStats.AddStatistic<int>("HasTravelContract", 0);
                 if (__instance.HasTravelContract == true)
                 {
@@ -74,7 +76,8 @@ namespace MapRandomizer.Patches
 		{
 			public static void Prefix(SimGameState __instance, string actionValue, string[] additionalValues)
 			{
-				ModState.IsSystemActionPatch = actionValue;
+                if (__instance.IsCampaign) return;
+                ModState.IsSystemActionPatch = actionValue;
 				ModState.SpecMapID = additionalValues.ElementAtOrDefault(4);
 				ModState.IgnoreBiomes = additionalValues.ElementAtOrDefault(5);
 				ModState.CustomDifficulty = additionalValues.ElementAtOrDefault(6).ParseInt();
@@ -89,7 +92,8 @@ namespace MapRandomizer.Patches
 		{
 			public static void Prefix(SimGameState __instance, Dictionary<string, StarSystem> ___starDict, SimGameState.AddContractData contractData)
 			{
-				StarSystem AddContractSystem;
+                if (__instance.IsCampaign) return;
+                StarSystem AddContractSystem;
 				
 				if (!string.IsNullOrEmpty(contractData.TargetSystem))
 				{
@@ -110,6 +114,7 @@ namespace MapRandomizer.Patches
 
 			public static void Postfix(SimGameState __instance, SimGameState.AddContractData contractData)
 			{
+                if (__instance.IsCampaign) return;
                 ModState.IsSystemActionPatch = null;
 
 				ModState.AddContractBiomes = null;
@@ -132,6 +137,7 @@ namespace MapRandomizer.Patches
             public static void Prefix(ref bool __runOriginal, SimGameState __instance, Contract contract, FactionValue employer, FactionValue employersAlly, FactionValue target, FactionValue targetsAlly, FactionValue NeutralToAll, FactionValue HostileToAll, Biome.BIOMESKIN skin, int presetSeed, StarSystem system)
             {
                 if (!__runOriginal) return;
+                if (__instance.IsCampaign) return;
                 ModInit.modLog?.Info?.Write($"{contract.Name} presetSeed: {presetSeed}");
                 ModInit.modLog?.Info?.Write($"{contract.Name} contract.IsPriorityContract: {contract.IsPriorityContract}");
                 if (presetSeed != 0 && !contract.IsPriorityContract)
@@ -244,8 +250,7 @@ namespace MapRandomizer.Patches
 		{
 			public static void Prefix(ref bool __runOriginal, ref List<MapAndEncounters> __result, MetadataDatabase mdd, int contractTypeID, bool includeUnpublishedContractTypes)
             {
-
-				if (string.IsNullOrEmpty(ModState.IsSystemActionPatch))
+                if (string.IsNullOrEmpty(ModState.IsSystemActionPatch))
 				{
                     ModInit.modLog?.Info?.Write($"[GetReleasedMapsAndEncountersByContractTypeAndOwnership_Patch] - found flag to skip implementation");
                     __runOriginal = true;

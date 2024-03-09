@@ -39,5 +39,6 @@ namespace MapRandomizer
         public bool enableLogging = true;
         public bool enableTravelFix = false;
         public string ContractTimeoutIcon = "";
+        public bool disableForStory = false;
     }
 }

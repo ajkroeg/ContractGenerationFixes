@@ -16,6 +16,7 @@ namespace MapRandomizer.source.Patches
         {
             public static void Prefix(SimGameState __instance)
             {
+                if (__instance.IsCampaign) return;
                 foreach (var diffOverride in ModState.SavedDiffOverrides)
                 {
                     __instance.CompanyStats.AddStatistic(diffOverride.Key, diffOverride.Value);
@@ -29,6 +30,7 @@ namespace MapRandomizer.source.Patches
             public static void Postfix(SimGameState __instance)
             {
                 ModState.Reset();
+                if (__instance.IsCampaign) return;
                 foreach (var statistic in __instance.CompanyStats)
                 {
                     if (statistic.Key.StartsWith("MR_DIFFICULTY_"))
